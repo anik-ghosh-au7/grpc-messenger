@@ -31,7 +31,7 @@ func NewChatApiClient(cc grpc.ClientConnInterface) ChatApiClient {
 }
 
 func (c *chatApiClient) Connect(ctx context.Context, in *User, opts ...grpc.CallOption) (ChatApi_ConnectClient, error) {
-	stream, err := c.cc.NewStream(ctx, &ChatApi_ServiceDesc.Streams[0], "/ChatApi/Connect", opts...)
+	stream, err := c.cc.NewStream(ctx, &ChatApi_ServiceDesc.Streams[0], "/main.ChatApi/Connect", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func (x *chatApiConnectClient) Recv() (*Message, error) {
 
 func (c *chatApiClient) Broadcast(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Message, error) {
 	out := new(Message)
-	err := c.cc.Invoke(ctx, "/ChatApi/Broadcast", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/main.ChatApi/Broadcast", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +134,7 @@ func _ChatApi_Broadcast_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ChatApi/Broadcast",
+		FullMethod: "/main.ChatApi/Broadcast",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ChatApiServer).Broadcast(ctx, req.(*Message))
@@ -146,7 +146,7 @@ func _ChatApi_Broadcast_Handler(srv interface{}, ctx context.Context, dec func(i
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var ChatApi_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "ChatApi",
+	ServiceName: "main.ChatApi",
 	HandlerType: (*ChatApiServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
