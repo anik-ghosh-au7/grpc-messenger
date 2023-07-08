@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option go_package = "./proto";
+
+service ChatApi {
+    rpc Connect (User) returns (stream Message);
+    rpc Broadcast (Message) returns (Message);
+}
+
+message User {
+    string id = 1;
+}
+
+message Message {
+    User user = 1;
+    string content = 2;  
+}
