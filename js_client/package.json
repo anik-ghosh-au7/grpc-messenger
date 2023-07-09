@@ -1,0 +1,23 @@
+{
+  "name": "js_client",
+  "version": "1.0.0",
+  "description": "",
+  "main": "client.js",
+  "scripts": {
+    "start": "rm -rf dist && npm run build && node dist/client.bundle.js",
+    "dev": "node .",
+    "build": "webpack"
+  },
+  "keywords": [],
+  "author": "anik-ghosh-au7",
+  "license": "ISC",
+  "dependencies": {
+    "@grpc/grpc-js": "^1.8.17",
+    "@grpc/proto-loader": "^0.7.7"
+  },
+  "devDependencies": {
+    "webpack": "^5.88.1",
+    "webpack-cli": "^5.1.4",
+    "webpack-node-externals": "^3.0.0"
+  }
+}
