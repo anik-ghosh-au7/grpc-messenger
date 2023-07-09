@@ -13,6 +13,8 @@ service ChatApi {
     rpc Connect (User) returns (stream Message);
     // The Broadcast RPC method takes a Message as input and returns a Message
     rpc Broadcast (Message) returns (Message);
+    // The GetClients RPC method takes a Message as input and returns a Message
+    rpc GetClients (Empty) returns (ClientList);
 }
 
 // Define a User message
@@ -25,3 +27,11 @@ message Message {
     User user = 1; // user who sends the message
     string content = 2; // content of the message  
 }
+
+// Define a ClientList message
+message ClientList {
+    repeated string client_ids = 1; // connected client ids
+}
+
+// Define a Empty message
+message Empty {}

@@ -47,6 +47,20 @@ func (s *server) Broadcast(ctx context.Context, message *chat.Message) (*chat.Me
 	return message, nil // Return the message and nil error
 }
 
+func (s *server) GetClients(ctx context.Context, empty *chat.Empty) (*chat.ClientList, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	clientIDs := make([]string, 0, len(s.clients))
+	for id := range s.clients {
+		clientIDs = append(clientIDs, id)
+	}
+
+	return &chat.ClientList{
+		ClientIds: clientIDs,
+	}, nil
+}
+
 // StartGrpcServer is a function which starts a new gRPC server.
 func StartGrpcServer() error {
 	listener, err := net.Listen("tcp", ":8080") // Listen for TCP connections on port 8080

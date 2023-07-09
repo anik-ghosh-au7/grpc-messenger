@@ -22,6 +22,8 @@ type ChatApiClient interface {
 	Connect(ctx context.Context, in *User, opts ...grpc.CallOption) (ChatApi_ConnectClient, error)
 	// The Broadcast RPC method takes a Message as input and returns a Message
 	Broadcast(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Message, error)
+	// The GetClients RPC method takes a Message as input and returns a Message
+	GetClients(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*ClientList, error)
 }
 
 type chatApiClient struct {
@@ -73,6 +75,15 @@ func (c *chatApiClient) Broadcast(ctx context.Context, in *Message, opts ...grpc
 	return out, nil
 }
 
+func (c *chatApiClient) GetClients(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*ClientList, error) {
+	out := new(ClientList)
+	err := c.cc.Invoke(ctx, "/main.ChatApi/GetClients", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ChatApiServer is the server API for ChatApi service.
 // All implementations must embed UnimplementedChatApiServer
 // for forward compatibility
@@ -81,6 +92,8 @@ type ChatApiServer interface {
 	Connect(*User, ChatApi_ConnectServer) error
 	// The Broadcast RPC method takes a Message as input and returns a Message
 	Broadcast(context.Context, *Message) (*Message, error)
+	// The GetClients RPC method takes a Message as input and returns a Message
+	GetClients(context.Context, *Empty) (*ClientList, error)
 	mustEmbedUnimplementedChatApiServer()
 }
 
@@ -93,6 +106,9 @@ func (UnimplementedChatApiServer) Connect(*User, ChatApi_ConnectServer) error {
 }
 func (UnimplementedChatApiServer) Broadcast(context.Context, *Message) (*Message, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Broadcast not implemented")
+}
+func (UnimplementedChatApiServer) GetClients(context.Context, *Empty) (*ClientList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetClients not implemented")
 }
 func (UnimplementedChatApiServer) mustEmbedUnimplementedChatApiServer() {}
 
@@ -146,6 +162,24 @@ func _ChatApi_Broadcast_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ChatApi_GetClients_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatApiServer).GetClients(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/main.ChatApi/GetClients",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatApiServer).GetClients(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ChatApi_ServiceDesc is the grpc.ServiceDesc for ChatApi service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -156,6 +190,10 @@ var ChatApi_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Broadcast",
 			Handler:    _ChatApi_Broadcast_Handler,
+		},
+		{
+			MethodName: "GetClients",
+			Handler:    _ChatApi_GetClients_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
