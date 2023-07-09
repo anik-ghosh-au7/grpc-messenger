@@ -7,6 +7,8 @@ package main;
 // This option specifies the name and path of the Go package
 option go_package = "./chat";
 
+import "google/api/annotations.proto";
+
 // Define the ChatApi service with two RPC methods:
 service ChatApi {
     // The Connect RPC method takes a User as input and returns a stream of Messages
@@ -14,7 +16,11 @@ service ChatApi {
     // The Broadcast RPC method takes a Message as input and returns a Message
     rpc Broadcast (Message) returns (Message);
     // The GetClients RPC method takes a Message as input and returns a Message
-    rpc GetClients (Empty) returns (ClientList);
+    rpc GetClients (Empty) returns (ClientList) {
+        option (google.api.http) = {
+            get: "/clients"
+        };
+    };
 }
 
 // Define a User message
