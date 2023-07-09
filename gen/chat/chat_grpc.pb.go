@@ -18,7 +18,9 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ChatApiClient interface {
+	// The Connect RPC method takes a User as input and returns a stream of Messages
 	Connect(ctx context.Context, in *User, opts ...grpc.CallOption) (ChatApi_ConnectClient, error)
+	// The Broadcast RPC method takes a Message as input and returns a Message
 	Broadcast(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Message, error)
 }
 
@@ -75,7 +77,9 @@ func (c *chatApiClient) Broadcast(ctx context.Context, in *Message, opts ...grpc
 // All implementations must embed UnimplementedChatApiServer
 // for forward compatibility
 type ChatApiServer interface {
+	// The Connect RPC method takes a User as input and returns a stream of Messages
 	Connect(*User, ChatApi_ConnectServer) error
+	// The Broadcast RPC method takes a Message as input and returns a Message
 	Broadcast(context.Context, *Message) (*Message, error)
 	mustEmbedUnimplementedChatApiServer()
 }

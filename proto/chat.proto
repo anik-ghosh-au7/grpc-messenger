@@ -1,19 +1,27 @@
+// This is the syntax version we're using
 syntax = "proto3";
 
+// This will be the name of the package in the generated code
 package main;
 
+// This option specifies the name and path of the Go package
 option go_package = "./chat";
 
+// Define the ChatApi service with two RPC methods:
 service ChatApi {
+    // The Connect RPC method takes a User as input and returns a stream of Messages
     rpc Connect (User) returns (stream Message);
+    // The Broadcast RPC method takes a Message as input and returns a Message
     rpc Broadcast (Message) returns (Message);
 }
 
+// Define a User message
 message User {
-    string id = 1;
+    string id = 1; // user id
 }
 
+// Define a Message message
 message Message {
-    User user = 1;
-    string content = 2;  
+    User user = 1; // user who sends the message
+    string content = 2; // content of the message  
 }
