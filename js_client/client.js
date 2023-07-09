@@ -15,9 +15,9 @@ rl.question("Enter the server url (example: localhost:8080): ", (serverURL) => {
     // Load the chat.proto file
     const packageDefinition = protoLoader.loadSync('../proto/chat.proto');
     // Load the chat service definition from the package definition
-    const { main } = grpc.loadPackageDefinition(packageDefinition);
+    const chat = grpc.loadPackageDefinition(packageDefinition);
     // Connect to the gRPC server using the chat service
-    const client = new main.ChatApi(
+    const client = new chat.main.ChatApi(
       serverURL,
       grpc.credentials.createInsecure()
     );
