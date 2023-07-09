@@ -4,9 +4,11 @@ import (
 	"context"
 	"log"
 	"net"
+	"net/http"
 	"sync"
 
 	"github.com/anik-ghosh-au7/grpc-messenger/gen/chat"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 )
 
@@ -63,15 +65,27 @@ func (s *server) GetClients(ctx context.Context, empty *chat.Empty) (*chat.Clien
 
 // StartGrpcServer is a function which starts a new gRPC server.
 func StartGrpcServer() error {
+	s := &server{ // Create a new server instance
+		clients: make(map[string]chat.ChatApi_ConnectServer), // Initialize an empty clients map
+	}
+	go func() {
+		// create multiplexer
+		mux := runtime.NewServeMux()
+
+		// register
+		chat.RegisterChatApiHandlerServer(context.Background(), mux, s)
+
+		// http server on port 8000
+		log.Fatalln(http.ListenAndServe(":8000", mux))
+	}()
+
 	listener, err := net.Listen("tcp", ":8080") // Listen for TCP connections on port 8080
 	if err != nil {
 		return err // If there's an error, return it
 	}
 
 	srv := grpc.NewServer() // Create a new gRPC server
-	chat.RegisterChatApiServer(srv, &server{
-		clients: make(map[string]chat.ChatApi_ConnectServer), // Initialize an empty clients map
-	})
+	chat.RegisterChatApiServer(srv, s)
 
 	log.Println("Server started. Listening on port 8080.") // Log server start
 	return srv.Serve(listener)                             // Start serving the server and return any potential error
