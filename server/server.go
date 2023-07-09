@@ -52,13 +52,15 @@ func (s *server) Broadcast(ctx context.Context, message *chat.Message) (*chat.Me
 func (s *server) GetClients(ctx context.Context, empty *chat.Empty) (*chat.ClientList, error) {
 	s.mu.Lock() // Prevent concurrent map reads
 	defer s.mu.Unlock()
+	// Create an array to store the client ids
 	clientIDs := make([]string, 0, len(s.clients))
+	// Loop over all clients and append the id of each client to clientIDs
 	for id := range s.clients {
 		clientIDs = append(clientIDs, id)
 	}
 	return &chat.ClientList{
 		ClientIds: clientIDs,
-	}, nil
+	}, nil // Return the ClientList and nil error
 }
 
 // StartGrpcServer is a function which starts a new gRPC server.
