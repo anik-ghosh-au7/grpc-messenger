@@ -13,7 +13,16 @@ rl.question("Enter the server url (example: localhost:8080): ", (serverURL) => {
   // Ask the user for their client ID
   rl.question("Enter your client ID: ", (clientID) => {
     // Load the chat.proto file
-    const packageDefinition = protoLoader.loadSync('../proto/chat.proto');
+    const packageDefinition = protoLoader.loadSync('../proto/chat.proto', {
+      keepCase: true, // original field names will be used
+      longs: String, // represent long values as strings
+      enums: String, // represent enum values as strings
+      defaults: true, // set fields to default value if not set
+      oneofs: true, // generates a property for oneof fields in the message to indicate which field is set
+      // this is to load proto files from google, otherwise we would see error:
+      // unresolvable extensions: 'extend google.protobuf.MethodOptions' in .google.api
+      includeDirs: ['../proto/google/api', '../proto'],
+    });
     // Load the chat service definition from the package definition
     const chat = grpc.loadPackageDefinition(packageDefinition);
     // Connect to the gRPC server using the chat service
