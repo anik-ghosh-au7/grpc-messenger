@@ -17,7 +17,6 @@ func main() {
 	fmt.Print("Enter 's' to start as a server, or 'c' to start as a client: ")
 	option, _ := reader.ReadString('\n') // Read the user's option from the standard input
 	option = strings.TrimSpace(option)   // Trim whitespace from the option
-
 	// Depending on the user's choice, start the application as a server or as a client
 	switch option {
 	case "s":

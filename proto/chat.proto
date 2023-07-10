@@ -1,27 +1,37 @@
 // This is the syntax version we're using
 syntax = "proto3";
-
 // This will be the name of the package in the generated code
 package main;
-
 // This option specifies the name and path of the Go package
 option go_package = "./chat";
-
+// Import Google's common annotations for HTTP configuration
+import "google/api/annotations.proto";
 // Define the ChatApi service with two RPC methods:
 service ChatApi {
     // The Connect RPC method takes a User as input and returns a stream of Messages
     rpc Connect (User) returns (stream Message);
     // The Broadcast RPC method takes a Message as input and returns a Message
     rpc Broadcast (Message) returns (Message);
+    // The GetClients RPC method returns a list of all connected client IDs.
+    // It uses the HTTP GET method and is accessible under the "/clients" route.
+    rpc GetClients (Empty) returns (ClientList) {
+        option (google.api.http) = {
+            get: "/clients"
+        };
+    };
 }
-
 // Define a User message
 message User {
     string id = 1; // user id
 }
-
 // Define a Message message
 message Message {
     User user = 1; // user who sends the message
     string content = 2; // content of the message  
 }
+// Define a ClientList message
+message ClientList {
+    repeated string client_ids = 1; // List of connected client IDs
+}
+// Define a Empty message
+message Empty {}

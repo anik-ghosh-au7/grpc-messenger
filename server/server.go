@@ -4,9 +4,11 @@ import (
 	"context"
 	"log"
 	"net"
+	"net/http"
 	"sync"
 
 	"github.com/anik-ghosh-au7/grpc-messenger/gen/chat"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 )
 
@@ -35,7 +37,6 @@ func (s *server) Connect(user *chat.User, stream chat.ChatApi_ConnectServer) err
 func (s *server) Broadcast(ctx context.Context, message *chat.Message) (*chat.Message, error) {
 	s.mu.Lock()         // Lock the mutex to prevent concurrent map reads
 	defer s.mu.Unlock() // Defer unlocking the mutex
-
 	// Loop over all clients and send the message to each client (except for the sender)
 	for id, clientStream := range s.clients {
 		if id != message.User.Id {
@@ -47,18 +48,37 @@ func (s *server) Broadcast(ctx context.Context, message *chat.Message) (*chat.Me
 	return message, nil // Return the message and nil error
 }
 
+// GetClients returns the IDs of all connected clients.
+func (s *server) GetClients(ctx context.Context, empty *chat.Empty) (*chat.ClientList, error) {
+	s.mu.Lock() // Prevent concurrent map reads
+	defer s.mu.Unlock()
+	// Create an array to store the client ids
+	clientIDs := make([]string, 0, len(s.clients))
+	// Loop over all clients and append the id of each client to clientIDs
+	for id := range s.clients {
+		clientIDs = append(clientIDs, id)
+	}
+	return &chat.ClientList{
+		ClientIds: clientIDs,
+	}, nil // Return the ClientList and nil error
+}
+
 // StartGrpcServer is a function which starts a new gRPC server.
 func StartGrpcServer() error {
+	s := &server{ // Create a new server instance
+		clients: make(map[string]chat.ChatApi_ConnectServer), // Initialize an empty clients map
+	}
+	go func() {
+		mux := runtime.NewServeMux()                                    // Create a new ServeMux
+		chat.RegisterChatApiHandlerServer(context.Background(), mux, s) // Register the server on the mux
+		log.Fatalln(http.ListenAndServe(":8000", mux))                  // Start the HTTP server
+	}()
 	listener, err := net.Listen("tcp", ":8080") // Listen for TCP connections on port 8080
 	if err != nil {
 		return err // If there's an error, return it
 	}
-
 	srv := grpc.NewServer() // Create a new gRPC server
-	chat.RegisterChatApiServer(srv, &server{
-		clients: make(map[string]chat.ChatApi_ConnectServer), // Initialize an empty clients map
-	})
-
+	chat.RegisterChatApiServer(srv, s)
 	log.Println("Server started. Listening on port 8080.") // Log server start
 	return srv.Serve(listener)                             // Start serving the server and return any potential error
 }

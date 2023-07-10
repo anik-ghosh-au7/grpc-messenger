@@ -13,40 +13,42 @@ rl.question("Enter the server url (example: localhost:8080): ", (serverURL) => {
   // Ask the user for their client ID
   rl.question("Enter your client ID: ", (clientID) => {
     // Load the chat.proto file
-    const packageDefinition = protoLoader.loadSync('../proto/chat.proto');
-
+    const packageDefinition = protoLoader.loadSync('../proto/chat.proto', {
+      keepCase: true, // original field names will be used
+      longs: String, // represent long values as strings
+      enums: String, // represent enum values as strings
+      defaults: true, // set fields to default value if not set
+      oneofs: true, // generates a property for oneof fields in the message to indicate which field is set
+      // this is to load proto files from google, otherwise we would see error:
+      // unresolvable extensions: 'extend google.protobuf.MethodOptions' in .google.api
+      includeDirs: ['../proto/google/api', '../proto'],
+    });
     // Load the chat service definition from the package definition
-    const { main } = grpc.loadPackageDefinition(packageDefinition);
-
+    const chat = grpc.loadPackageDefinition(packageDefinition);
     // Connect to the gRPC server using the chat service
-    const client = new main.ChatApi(
+    const client = new chat.main.ChatApi(
       serverURL,
       grpc.credentials.createInsecure()
     );
-
     // Create a new stream to the Connect method on the server
     const stream = client.Connect({ id: clientID });
-
     // Listen for 'data' events on the stream, which are triggered when messages are received from the server
     stream.on('data', (message) => {
       // Log incoming messages
       console.log(`${message.user.id}: ${message.content}`);
     });
-
     // Listen for 'error' events on the stream, which are triggered when an error occurs
     stream.on('error', (error) => {
       // Log the error and exit the process
       console.log('Disconnected from server due to error:', error.message);
       process.exit(1);
     });
-
     // Listen for 'end' events on the stream, which are triggered when the server ends the stream
     stream.on('end', () => {
       // Log the disconnection and exit the process
       console.log('Disconnected from server.');
       process.exit();
     });
-
     // Listen for 'line' events on the readline interface, which are triggered when the user enters a message
     rl.on('line', (line) => {
       // Send the message to the server using the Broadcast method
