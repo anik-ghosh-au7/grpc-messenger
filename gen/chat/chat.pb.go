@@ -135,7 +135,7 @@ type ClientList struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ClientIds []string `protobuf:"bytes,1,rep,name=client_ids,json=clientIds,proto3" json:"client_ids,omitempty"` // List of connected client IDs
+	ClientIds []string `protobuf:"bytes,1,rep,name=client_ids,json=clientIds,proto3" json:"client_ids,omitempty"` // zero or more client IDs (like an array)
 }
 
 func (x *ClientList) Reset() {

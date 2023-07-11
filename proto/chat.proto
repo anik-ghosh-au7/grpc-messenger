@@ -31,7 +31,7 @@ message Message {
 }
 // Define a ClientList message
 message ClientList {
-    repeated string client_ids = 1; // List of connected client IDs
+    repeated string client_ids = 1; // zero or more client IDs (like an array)
 }
 // Define a Empty message
 message Empty {}
